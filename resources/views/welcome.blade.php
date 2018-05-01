@@ -79,7 +79,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    Ecommerce Sandbox
+                    Ecommerce Sandbox  
                 </div>
             </div>
         </div>
