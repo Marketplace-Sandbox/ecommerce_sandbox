@@ -1,5 +1,8 @@
 @extends('layouts.backend.dashboard') 
 
+@section('head')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.4.0/min/dropzone.min.css">
+@endsection
 @section('content')
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
@@ -28,7 +31,7 @@
             </div> 
             <!-- /. Form Errors -->
                         
-            <form method="POST" action="/admin/products/{{$product->id}}" class="form-horizontal">
+            <form method="POST" action="/admin/products/{{$product->id}}" class="form-horizontal" enctype="multipart/form-data">
                 {{ method_field("PATCH") }}
                 @csrf
                 <section class="col-md-9">
@@ -153,6 +156,43 @@
                 </section>                
                 <!-- /. Product Category -->
 
+                <section class="col-md-3">
+                    <div class="box box-solid">  
+                        <div class="box-header with-border">
+                            <h3 class="box-title">{{ __('Product Image') }}</h3>
+                        </div>                      
+                        <div class="box-body product-publish">                            
+                            <div>
+                                @if($product->productImage('feature'))
+                                <a class="upload-featured pointer hide">Edit featured image</a>
+                                <img id="preview-img" src="{{ Storage::disk('local')->url('products\\' . $product->productImage('feature')->path) }}">                                                               
+                                <a class="pointer" id="remove-feature-id" data-id="{{ $product->id }}">{{ __('Remove image') }}</a>                                                                                                
+                                @else
+                                <a class="upload-featured pointer">Add featured image</a>
+                                <img id="preview-img" style="display:none;"/>
+                                <a class="pointer remove-img" style="display:none;">{{ __('Remove image') }}</a>                                                                                                                                
+                                @endif
+                                <input type="file" name="featured_img" id="featured-img" style="display:none;" onchange="showPreview(this)">                                
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.box-footer --> 
+                </section> 
+                <!-- /. Update featured image  -->  
+
+                <section class="col-md-3">
+                    <div class="box box-solid">  
+                        <div class="box-header with-border">
+                            <h2 class="box-title">{{ __('Product Gallery') }}</h2>
+                        </div>                      
+                        <div class="box-body product-publish">                            
+                            <a href="#" class="open-image-modal" data-toggle="modal" data-target="#image-modal">{{ __('Update product gallery images')}}</a>
+                        </div>
+                    </div>
+                    <!-- /.box-footer --> 
+                </section> 
+                <!-- /. Update gallery images --> 
+
                 <section class="col-md-9">
                     <div class="box box-solid">
                         <div class="box-header with-border">
@@ -213,14 +253,16 @@
                         <!-- /. box body -->                      
                     </div>
                 </section>   
-                <!-- /. Product Data -->
-                                                      
+                <!-- /. Product Data -->                                   
             </form> 
-            
+
             <form id="delete-form" method="POST" action="{{ route('product.delete', $product->id) }}" style="display: none;">
                 {{ method_field("DELETE") }}
                 @csrf
             </form>
+            
+            @include('components.dropzone', ['route'=>'/admin/products/update_gallery/'. $product->id])                            
+            
         </div>  
         <!-- /. row -->
     </section>
@@ -232,4 +274,22 @@
 <!-- Adding texteditor scripts -->
 @section('footer')
     @include('components.texteditor', ['name'=>'description'])
+    <script src="{{asset('js/dropzone.js')}}"></script> 
+    <script>
+        function showPreview(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#preview-img').attr('src', e.target.result);
+                    document.getElementById('preview-img').style.display = "block";
+                    $('.remove-img').show(); 
+                    $('#remove-feature-id').hide();                         
+                };
+
+                reader.readAsDataURL(input.files[0]);
+                $('.upload-featured').hide();
+            }
+        }
+    </script>      
 @endsection
